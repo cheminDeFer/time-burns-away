@@ -1,0 +1,6 @@
+gs.db
+*.py[co]
+*.egg-info
+build/*
+dist/*
+.tox/*

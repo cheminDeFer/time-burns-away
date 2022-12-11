@@ -1,0 +1,3 @@
+pyfiglet
+pre-commit
+pytest
