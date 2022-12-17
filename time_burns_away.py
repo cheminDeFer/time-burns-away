@@ -51,7 +51,6 @@ def c_main(
 ) -> int:
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     f = Figlet(font="roman___")
-
     timeout_s = get_user_entry(stdscr)
     if timeout_s == -1:
         return 0
@@ -61,6 +60,14 @@ def c_main(
         text_to_render = f"{i//3600:02d} : {((i%3600) // 60):02d} : {i%60:02d}"
         stdscr.addstr(f.renderText(text_to_render))
         stdscr.refresh()
+        stdscr.nodelay(True)
+        try:
+            c = stdscr.get_wch()
+            if c == "q":
+                break
+        except curses.error:
+            pass
+    stdscr.nodelay(False)
     _ = stdscr.get_wch()
     return 0
 
