@@ -3,14 +3,13 @@ from typing import Generator
 import sys
 
 from pyfiglet import Figlet
+import time
 
 
 def _wait(s: int) -> Generator:
-    import time
-
     for i in range(s - 1, -1, -1):
-        time.sleep(1)
         yield i
+        time.sleep(1)
 
 
 def _convert2second(hhmm: str) -> int:
@@ -18,15 +17,13 @@ def _convert2second(hhmm: str) -> int:
     return int(hour) * 3600 + int(minute) * 60
 
 
-def c_main(
-    stdscr: "curses._CursesWindow",
-) -> int:
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    f = Figlet(font="roman___")
+def get_user_entry(stdscr):
     entry_done = False
     timeout = ""
     while True:
         if entry_done:
+            if timeout == "q":
+                return -1
             try:
                 timeout_s = _convert2second(timeout)
                 break
@@ -35,7 +32,7 @@ def c_main(
                 entry_done = False
 
         else:
-            stdscr.addstr(0, 0, "Enter time as hh:mm to count down: ")
+            stdscr.addstr(0, 0, "Enter time as hh:mm to count down or q to quit: ")
             stdscr.clrtoeol()
             stdscr.addstr(timeout)
 
@@ -46,25 +43,25 @@ def c_main(
                 timeout = timeout[:-1]
             elif char == "\n":
                 entry_done = True
+    return timeout_s
 
-    tmp = f"{timeout_s//3600:02d} : {((timeout_s%3600) // 60):02d} : {timeout_s%60:02d}"
-    text_to_render = tmp
 
-    stdscr.attron(curses.color_pair(1))
-    stdscr.clear()
-    stdscr.addstr(
-        0,
-        0,
-        f.renderText(text_to_render),
-    )
-    stdscr.refresh()
+def c_main(
+    stdscr: "curses._CursesWindow",
+) -> int:
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+    f = Figlet(font="roman___")
+
+    timeout_s = get_user_entry(stdscr)
+    if timeout_s == -1:
+        return 0
+
     for i in _wait(timeout_s):
-        if not i == timeout_s:
-            stdscr.clear()
-            text_to_render = f"{i//3600:02d} : {((i%3600) // 60):02d} : {i%60:02d}"
-            stdscr.addstr(f.renderText(text_to_render))
-            stdscr.refresh()
-    char = stdscr.get_wch()
+        stdscr.clear()
+        text_to_render = f"{i//3600:02d} : {((i%3600) // 60):02d} : {i%60:02d}"
+        stdscr.addstr(f.renderText(text_to_render))
+        stdscr.refresh()
+    _ = stdscr.get_wch()
     return 0
 
 

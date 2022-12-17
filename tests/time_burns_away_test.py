@@ -1,5 +1,14 @@
 from time_burns_away import _convert2second
+import pytest
 
 
-def test__convert2second():
-    assert 3600 + 2 * 60 == _convert2second("01:02")
+@pytest.mark.parametrize(
+    ("input_hhmm", "expected"),
+    (
+        ("1:0", 3600),
+        ("0:1", 60),
+        ("3:5", 11100),
+    ),
+)
+def test__convert2second(input_hhmm, expected):
+    assert expected == _convert2second(input_hhmm)
